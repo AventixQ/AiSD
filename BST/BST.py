@@ -8,6 +8,28 @@ class BST:
         self.left_child = None
         self.right_child = None
 
+def storeBTS(root,tab):
+    if root is None:
+        return
+    storeBTS(root.left_child, tab)
+    tab.append(root)
+    storeBTS(root.right_child, tab)
+
+def construct(tab, s, e):
+    if s > e:
+        return None
+    center = int((s+e)/2)
+    node = tab[center]
+    node.left_child = construct(tab, s, center-1)
+    node.right_child = construct(tab, center+1, e)
+    return node
+
+def balanced(root):
+    tab = []
+    storeBTS(root, tab)
+    n = len(tab)
+    x = construct(tab, 0, n-1)
+    return x
 
 def insert(bst, key):
     if bst is None:
@@ -198,7 +220,8 @@ while True:
                                 print(find_and_print(root, key))
                                 print("\n")
                         if chosen == 7:
-                            print("Nie wiem o co cmon") #
+                            pre_order(balanced(root))
+                            print("\n")
                         if chosen == 8:
                             break
                 except:
