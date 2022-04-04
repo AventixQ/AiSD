@@ -8,6 +8,68 @@ class BST:
         self.left_child = None
         self.right_child = None
 
+class AVL():
+    def __init__(self,key):
+        self.key=key
+        self.left_child=None
+        self.right_child=None
+        self.height=1
+
+def insert_AVL(root,key):
+    if not root:
+        return AVL(key)
+    elif key<root.key:
+        root.left_child = insert_AVL(root.left_child,key)
+    else:
+        root.right_child = insert_AVL(root.right_child,key)
+    root.height=1+max(heightGet(root.left_child),heightGet(root.right_child))
+    #balance factor
+    balancing = balance(root)
+    if balancing > 1 and key < root.left_child.val: #ll
+        return rightR(root)
+    if balancing < -1 and key > root.right_child.val: #rr
+            return leftR(root)
+    if balancing > 1 and key > root.left_child.val: #lr
+        root.left_child=leftR(root.left_child)
+        return rightR(root)
+    if balancing < -1 and key < root.right_child.val: #rl
+        root.right_child=rightR(root.right_child)
+        return leftR(root)
+    return root
+
+def leftR(l): #left Rotate
+    a=l.right_child
+    b=a.left_child
+    a.left_child=l
+    l.right_child=b
+
+    l.height = 1 + max(heightGet(l.left_child), heightGet(l.right_child))
+    a.height = 1 + max(heightGet(a.left_child), heightGet(a.right_child))
+
+    return a #new root
+
+def rightR(l): #right rotate
+    a = l.left_child
+    b = a.right_child
+    a.left_child = l
+    l.right_child = b
+
+    l.height = 1 + max(heightGet(l.left_child), heightGet(l.right_child))
+    a.height = 1 + max(heightGet(a.left_child), heightGet(a.right_child))
+
+    return a  # new root
+
+def heightGet(root):
+    if not root:
+        return 0
+    return root.height
+
+def balance(root): #for AVL
+    if not root:
+        return 0
+    a=heightGet(root.left_child)-heightGet(root.right_child)
+    return a
+        
 def storeBTS(root,tab):
     if root is None:
         return
@@ -24,21 +86,21 @@ def construct(tab, s, e):
     node.right_child = construct(tab, center+1, e)
     return node
 
-def balanced(root):
+def balanced(root): #for BST
     tab = []
     storeBTS(root, tab)
     n = len(tab)
     x = construct(tab, 0, n-1)
     return x
 
-def insert(bst, key):
+def insert_BST(bst, key):
     if bst is None:
         return BST(key)
 
     if key < bst.key:
-        bst.left_child = insert(bst.left_child, key)
+        bst.left_child = insert_BST(bst.left_child, key)
     else:
-        bst.right_child = insert(bst.right_child, key)
+        bst.right_child = insert_BST(bst.right_child, key)
 
     return bst
 
@@ -93,13 +155,13 @@ def find_and_print(root, key):
     return find_and_print(root.right_child, key)
 
 
-def delete(root, value):
+def delete_BST(root, value):
     if root is None:
         return
     if value < root.key:
-        root.left_child = delete(root.left_child, value)
+        root.left_child = delete_BST(root.left_child, value)
     elif value > root.key:
-        root.right_child = delete(root.right_child, value)
+        root.right_child = delete_BST(root.right_child, value)
     else:
         if root.right_child is None:
             temp = root.left_child
@@ -111,18 +173,69 @@ def delete(root, value):
             return temp
         temp = find_min(root.right_child)
         root.key = temp.key
-        root.right_child = delete(root, value)
+        root.right_child = delete_BST(root, value)
     return root
 
 
-def post_order_delete(root):
+def delete_AVL(root, key):
+    if not root:
+        return root
+    elif key<root.key:
+        root.left_child=delete_AVL(root.left_child,key)
+    elif key>root.key:
+        root.right_child=delete_AVL(root.right_child,key)
+    else:
+        if root.left_child is None:
+            a=root.right_child
+            root=None
+            return a
+        if root.right_child is None:
+            a=root.left_child
+            root=None
+            return a
+        a=min_val(root.right_child)
+        root.key=a.key
+        root.right_child=delete_AVL(root.right_child,a.key)
+    if root is None:
+        return root
+
+    root.height = 1 + max(heightGet(root.left_child), heightGet(root.right_child))
+
+    balancing = balance(root) #balancing tree
+    if balancing > 1 and key < root.left_child.val:  # ll
+        return rightR(root)
+    if balancing < -1 and key > root.right_child.val:  # rr
+        return leftR(root)
+    if balancing > 1 and key > root.left_child.val:  # lr
+        root.left_child = leftR(root.left_child)
+        return rightR(root)
+    if balancing < -1 and key < root.right_child.val:  # rl
+        root.right_child = rightR(root.right_child)
+        return leftR(root)
+    return root
+
+def min_val(root):
+    if root is None or root.left_child is None:
+        return root
+    return  min_val(root.left_child)
+
+def post_order_delete_BST(root):
     print("\nDelete post-order")
     post_order(root, post_order_tab)
     print("Deleted values")
     for x in range(len(post_order_tab)):
         val = post_order_tab[x]
         print(val, end="->")
-        delete(root, val)
+        delete_BST(root, val)
+
+def post_order_delete_AVL(root):
+    print("\nDelete post-order")
+    post_order(root, post_order_tab)
+    print("Deleted values")
+    for x in range(len(post_order_tab)):
+        val = post_order_tab[x]
+        print(val, end="->")
+        delete_AVL(root, val)
 
 
 def random_number_generator(n):
@@ -164,6 +277,11 @@ while True:
     print("Menu:\n1 - Dane wejściowe\n2 - Testy\n3 - Zakończ działanie programu")
     x = input()
     if x == "1":
+        print("Wybierz rodzaj drzewa (BST/AVL): ")
+        choose = input()
+        if choose != 'BST' and choose != "AVL":
+            print("To chyba nie jest poprawna wartosc! Sprobuj ponownie.")
+            continue
         print("Ile chcesz podać liczb?")
         ile_liczb = input()
         if ile_liczb.isnumeric():
@@ -173,7 +291,10 @@ while True:
                 try:
                     number = int(input())
                     if type(number) == int:
-                        root = insert(root, number)
+                        if choose == 'BST':
+                            root = insert_BST(root, number)
+                        else:
+                            root = insert_AVL(root, number) #przy wypisywaniu wartosci w pewnym momencie wypisuje except (dla >4 liczb) ?
                         ile += 1
                 except:
                     print("To nie jest liczba spróbuje jeszcze raz!")
@@ -197,7 +318,10 @@ while True:
                                 for v in range(value):
                                     value_td = int(input())
                                     if type(value_td) == int:
-                                        delete(root, value_td)
+                                        if choose == 'BST':
+                                            delete_BST(root, value_td)
+                                        else:
+                                            delete_AVL(root, value_td)
                             print("\n")
                         if chosen == 3:
                             print("In-order")
@@ -209,7 +333,10 @@ while True:
                             print("\n")
                         if chosen == 5:
                             print("Delete post-order")
-                            post_order_delete(root)
+                            if choose=='BST':
+                                post_order_delete_BST(root)
+                            else:
+                                post_order_delete_AVL(root)
                             print("\n")
                         if chosen == 6:
                             print("Podaj klucz do podrzewa: ")
@@ -220,8 +347,11 @@ while True:
                                 print(find_and_print(root, key))
                                 print("\n")
                         if chosen == 7:
-                            pre_order(balanced(root))
-                            print("\n")
+                            if choose == 'BST':
+                                pre_order(balanced(root))
+                                print("\n")
+                            else:
+                                print("To drzewo jest już zrównoważone!")
                         if chosen == 8:
                             break
                 except:
