@@ -213,7 +213,7 @@ def delete_AVL(root, key):
             a = root.left_child
             root = None
             return a
-        a = find_min(root.right_child)
+        a = min_val(root.right_child)
         root.key = a.key
         root.right_child = delete_AVL(root.right_child, a.key)
     if root is None:
